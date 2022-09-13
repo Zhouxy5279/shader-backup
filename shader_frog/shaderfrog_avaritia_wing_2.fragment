@@ -116,7 +116,8 @@ void main() {
 	vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.65 + 0.35 * breath));
 	vec4 breathing_rgb = vec4(c_rgb, 1.0);
 
-    vec4 wave_frag = vec4(mod(length(vec2(vUv[0]-1., vUv[1] - 0.5)) - time *0.1, 0.1) * 10.);
+    // vec4 wave_frag = vec4(mod(length(vec2(vUv[0]-1., vUv[1] - 0.5)) - time *0.1, 0.2) * 7.);
+    vec4 wave_frag = vec4(sin(length(vec2(floor((vUv[0]-1.)*32.), floor((vUv[1] - 0.5)*32.))) - time)*2.);  // pixelate!
 
     vec4 stars = vec4(0., 0., 0., 1.0);
 
@@ -134,7 +135,7 @@ void main() {
         }
     }
 
-    gl_FragColor = mix(mix(breathing_rgb, wave_frag, 0.3), stars, breath * 0.5 - 0.5);
+    gl_FragColor = mix(mix(breathing_rgb, wave_frag, 0.3), stars, breath - wave_frag.b*0.5);
 
 
 
