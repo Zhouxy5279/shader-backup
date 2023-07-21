@@ -293,11 +293,11 @@ testColor.a *= alphaTestMultiplier;
 		vec3 c_hsv = rgb2hsv(tex_color.rgb);
 		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.9 + 0.1 * breath));
 
-		vec4 wave_frag = vec4(sin(length(vec2(floor((-uv[0])*16.), floor((1.-uv[1])*16.))*1.) - TIME*3.) * 1.2);
+		vec4 wave_frag = vec4(sin(length(vec2(floor((-uv[0])*32.), floor((1.-uv[1])*32.))*1.) - TIME*3.) * 1.2);
 		vec4 crosses = vec4(0.0);
 		
-		for (int i = 1; i <= 160; i++){
-			float cs = Cross(vec2(uv[0] - mod(random_dir(vec2(float(i)))[0] * TIME*-0.03, 1.), uv[1] - mod(random_dir(vec2(float(i)))[1] * TIME*-0.02, 1.)), TIME, 1.);
+		for (int i = 1; i <= 70; i++){
+			float cs = Cross(vec2(uv[0] - mod(random_dir(vec2(float(i)))[0] * TIME*-0.1, 1.), 1. - uv[1] - mod(random_dir(vec2(float(i)))[1] * TIME*-0.1, 1.)), TIME*2., 1.);
 			if (cs > 0.)
 				crosses = vec4(tex_color.rgb * cs * breath, 1.0);
     	}

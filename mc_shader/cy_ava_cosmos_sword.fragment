@@ -98,11 +98,11 @@ float Cross(vec2 uv, float a, float sparkle) {  //  float
     vec2 av1 = abs(uv);
  	vec2 av2 = abs(uv*Rot(a));
     vec2 av = min(av1, av2);
-    
+
     float fu = floor(av2[0] * 250.);
     float fv = floor(av2[1] * 250.);
     float m = fu + fv;
-    
+
     if (fu < 4. && fv < 1.) {
         return m;
     }
@@ -160,7 +160,7 @@ void main()
 #ifdef MASKED_MULTITEXTURE
 	vec4 tex1 = texture2D( TEXTURE_1, uv );
 
-	// If tex1 has a non-black color and no alpha, use color; otherwise use tex1 
+	// If tex1 has a non-black color and no alpha, use color; otherwise use tex1
 	float maskedTexture = float(dot( tex1.rgb, vec3(1.0, 1.0, 1.0) ) * ( 1.0 - tex1.a ) > 0.0);
 	color = mix(tex1, color, maskedTexture);
 #endif // MASKED_MULTITEXTURE
@@ -240,7 +240,7 @@ testColor.a *= alphaTestMultiplier;
 		discard;
 	}
 #endif
-	
+
 #endif
 
 #ifdef USE_BLOOM
@@ -282,28 +282,11 @@ testColor.a *= alphaTestMultiplier;
 
 	// ava funcs
 	vec4 tex_color = texture2D(TEXTURE_0, uv);
-	if (tex_color.a > 0.58 && tex_color.a < 0.59){
-		float breath = sin(radians(TIME * 90.));
-		vec3 c_hsv = rgb2hsv(tex_color.rgb);
-		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.8 + 0.2 * breath));
-		gl_FragColor = vec4(c_rgb, 1.0);
-	}
-	else if (tex_color.a > 0.695 && tex_color.a < 0.705){
-		float breath = sin(radians(TIME * 90.));
-		vec3 c_hsv = rgb2hsv(tex_color.rgb);
-		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.9 + 0.1 * breath));
+	vec4 ex_color = texture2D(TEXTURE_1, uv);
+	if (ex_color.a > 0.0){
+		vec4 wave_frag = vec4(sin(length(vec2(floor((-uv[0])*64.), floor((1.-uv[1])*64.)))*0.05 - TIME*2.) * 0.5);
 
-		vec4 wave_frag = vec4(sin(length(vec2(floor((uv[0]-0.875)*32.), floor((uv[1] - 0.5)*32.))*1.) - TIME*5.) * 0.6);
-		// vec4 wave_frag d= vec4(mod(length(vec2(uv[0]-0.9, uv[1] - 0.5)) - TIME * 0.2, 0.1) * 15.);
-		vec4 crosses = vec4(0.0);
-		
-		for (int i = 1; i <= 80; i++){
-			float cs = Cross(vec2(uv[0] - mod(random_dir(vec2(float(i)))[0] * TIME*-0.03, 1.), uv[1] - mod(random_dir(vec2(float(i)))[1] * TIME*-0.02, 1.)), TIME, 1.);
-			if (cs > 0.)
-				crosses = vec4(tex_color.rgb * cs * breath, 1.0);
-    	}
-
-		gl_FragColor = mix(mix(tex_color, wave_frag, 0.2), crosses, breath*0.4-wave_frag.r*0.4);
+		gl_FragColor = mix(ex_color, tex_color,  0.5+wave_frag);
 	}
 	else {
 		gl_FragColor = tex_color;

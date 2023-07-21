@@ -75,7 +75,7 @@ vec3 hsv2rgb(vec3 c)
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
+}	
 vec3 rgb2hsv(vec3 c) {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -88,7 +88,6 @@ vec2 random_dir(vec2 pos)
 {
 	return vec2(fract(sin(dot(pos.xy, vec2(6.66, 7.77)))*8.88), fract(sin(dot(pos.xy, vec2(8.88, 7.77)))*6.66));
 }
-
 mat2 Rot(float a) {
     float s=sin(a), c=cos(a);
     return mat2(c,-s,s,c);
@@ -98,11 +97,11 @@ float Cross(vec2 uv, float a, float sparkle) {  //  float
     vec2 av1 = abs(uv);
  	vec2 av2 = abs(uv*Rot(a));
     vec2 av = min(av1, av2);
-    
-    float fu = floor(av2[0] * 250.);
-    float fv = floor(av2[1] * 250.);
+
+    float fu = floor(av2[0] * 100.);
+    float fv = floor(av2[1] * 100.);
     float m = fu + fv;
-    
+
     if (fu < 4. && fv < 1.) {
         return m;
     }
@@ -282,31 +281,35 @@ testColor.a *= alphaTestMultiplier;
 
 	// ava funcs
 	vec4 tex_color = texture2D(TEXTURE_0, uv);
-	if (tex_color.a > 0.58 && tex_color.a < 0.59){
-		float breath = sin(radians(TIME * 90.));
-		vec3 c_hsv = rgb2hsv(tex_color.rgb);
-		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.8 + 0.2 * breath));
-		gl_FragColor = vec4(c_rgb, 1.0);
+	if (tex_color.a > 0.78 && tex_color.a < 0.79){
+		vec3 c_hsv = hsv2rgb(vec3(0.25 * TIME, 1.0, 1.0));
+		gl_FragColor = vec4(c_hsv, 1.0);
 	}
-	else if (tex_color.a > 0.695 && tex_color.a < 0.705){
+	else if (tex_color.a > 0.58 && tex_color.a < 0.59){
 		float breath = sin(radians(TIME * 90.));
 		vec3 c_hsv = rgb2hsv(tex_color.rgb);
-		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * breath, 0.9 + 0.1 * breath));
+		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g + 0.2 * breath, 0.8 + 0.2 * breath));
 
-		vec4 wave_frag = vec4(sin(length(vec2(floor((uv[0]-0.875)*32.), floor((uv[1] - 0.5)*32.))*1.) - TIME*5.) * 0.6);
-		// vec4 wave_frag d= vec4(mod(length(vec2(uv[0]-0.9, uv[1] - 0.5)) - TIME * 0.2, 0.1) * 15.);
+		vec4 wave_frag = vec4(sin(length(vec2(floor((uv[0]-0.875)*32.), floor((uv[1] - 0.5)*32.))*1.) - TIME*3.) * 1.2);
+		// vec4 wave_frag = vec4(mod(length(vec2(uv[0]-0.9, uv[1] - 0.5)) - TIME * 0.2, 0.1) * 15.);
 		vec4 crosses = vec4(0.0);
-		
-		for (int i = 1; i <= 80; i++){
-			float cs = Cross(vec2(uv[0] - mod(random_dir(vec2(float(i)))[0] * TIME*-0.03, 1.), uv[1] - mod(random_dir(vec2(float(i)))[1] * TIME*-0.02, 1.)), TIME, 1.);
+
+		for (int i = 1; i <= 20; i++){
+			float cs = Cross(vec2(uv[0] - mod(random_dir(vec2(float(i)))[0] * TIME*0.05, 1.), uv[1] - mod(random_dir(vec2(float(i)))[1] * TIME*-0.1, 1.)), TIME, 1.);
 			if (cs > 0.)
-				crosses = vec4(tex_color.rgb * cs * breath, 1.0);
+				crosses = vec4(tex_color.rgb * cs, 1.0);
     	}
 
-		gl_FragColor = mix(mix(tex_color, wave_frag, 0.2), crosses, breath*0.4-wave_frag.r*0.4);
+		gl_FragColor = mix(mix(tex_color, wave_frag, 0.2), crosses, breath*0.4-wave_frag.r*0.2);
+	}
+	else if (tex_color.a > 0.695 && tex_color.a < 0.705){
+		vec3 c_hsv = rgb2hsv(tex_color.rgb);
+		vec3 c_rgb = hsv2rgb(vec3(c_hsv.r, c_hsv.g - 0.2 * sin(radians(TIME * 90.)), 0.8 + 0.2 * sin(radians(TIME * 90.))));
+		// gl_FragColor = mix(vec4(c_rgb, 1.0), vec4(mod(uv[0] + TIME * 0.1, 0.05)*20), 0.5);
+		gl_FragColor = mix(vec4(c_rgb, 1.0), vec4(mod(sqrt(pow(uv[0], 2.0) - uv[0] + 0.25 + pow(uv[1], 2.0) - 1.5 * uv[1] + 0.5625) - TIME * 0.1, 0.05)*20.0), 0.3);
 	}
 	else {
-		gl_FragColor = tex_color;
+		gl_FragColor = color;
 	}
 
 }
